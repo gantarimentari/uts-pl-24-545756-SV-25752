@@ -9,13 +9,24 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
+    
     public function up(): void
     {
         Schema::create('places', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('name');
+            $table->string('category');
+            $table->unsignedTinyInteger('rating')->nullable();
+            $table->text('description')->nullable();
+            $table->string('address')->nullable();
+            $table->decimal('latitude', 10, 7)->nullable();
+            $table->decimal('longitude', 10, 7)->nullable();
+            $table->date('visit_date')->nullable();
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.
