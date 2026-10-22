@@ -13,5 +13,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+    Route::apiResource('places', PlaceController::class);
 });
-Route::apiResource('places', PlaceController::class);
