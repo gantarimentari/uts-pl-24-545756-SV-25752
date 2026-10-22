@@ -2,6 +2,8 @@
 
 namespace App\Models;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Place;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
@@ -30,4 +32,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function places(): HasMany
+{
+    return $this->hasMany(Place::class);
+}
 }
