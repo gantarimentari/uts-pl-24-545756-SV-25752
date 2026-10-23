@@ -35,4 +35,10 @@ class PlaceApiTest extends TestCase
             'name' => 'HeHa Sky View',
         ]);
     }
+     public function test_guest_cannot_access_places(): void
+    {
+        $response = $this->getJson('/api/places');
+
+        $response->assertUnauthorized();
+    }
 }
