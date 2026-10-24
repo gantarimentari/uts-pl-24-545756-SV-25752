@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { MapPin, Star } from 'lucide-vue-next'
 
@@ -10,7 +10,13 @@ import Sparkle from '@/components/placelog/bits/Sparkle.vue'
 import { createPlace, updatePlace } from '@/services/places'
 import type { Place, PlacePayload } from '@/types/place'
 
+const props = defineProps<{
+  initial?: Place
+}>()
+
 const router = useRouter()
+
+const isEditing = computed(() => !!props.initial)
 
 const categories = [
   'Cafe',
@@ -23,14 +29,22 @@ const categories = [
 ]
 
 const form = ref<PlacePayload>({
-  name: '',
-  category: 'Cafe',
-  rating: null,
-  description: '',
-  address: '',
-  latitude: null,
-  longitude: null,
-  visit_date: new Date().toLocaleDateString('en-CA'),
+  name: props.initial?.name ?? '',
+  category: props.initial?.category ?? 'Cafe',
+  rating: props.initial?.rating ?? null,
+  description: props.initial?.description ?? '',
+  address: props.initial?.address ?? '',
+  latitude:
+    props.initial?.latitude != null
+      ? Number(props.initial.latitude)
+      : null,
+  longitude:
+    props.initial?.longitude != null
+      ? Number(props.initial.longitude)
+      : null,
+  visit_date:
+    props.initial?.visit_date?.slice(0, 10) ??
+    new Date().toLocaleDateString('en-CA'),
 })
 
 const error = ref('')
@@ -48,9 +62,6 @@ function setLocation(
     form.value.address = address
   }
 }
-const props = defineProps<{
-  initial?: Place
-}>()
 
 async function handleSubmit() {
   error.value = ''
@@ -68,13 +79,16 @@ async function handleSubmit() {
   loading.value = true
 
   try {
-    const place = await createPlace({
+    const payload: PlacePayload = {
       ...form.value,
       name: form.value.name.trim(),
-    })
+    }
+
+    const place = props.initial
+      ? await updatePlace(props.initial.id, payload)
+      : await createPlace(payload)
 
     await router.push(`/places/${place.id}`)
-    await router.push('/journal')
   } catch (err) {
     error.value =
       err instanceof Error
@@ -85,6 +99,7 @@ async function handleSubmit() {
   }
 }
 </script>
+
 
 <template>
   <form
@@ -244,11 +259,14 @@ async function handleSubmit() {
           class="btn btn-primary flex-1 py-3"
           :disabled="loading"
         >
-          {{ loading ? 'Saving...' : 'Save Place' }}
+          {{ loading ? 'Saving...' : isEditing ? 'Save Changes' : 'Save Place' }}
         </button>
 
-        <RouterLink to="/journal" class="btn btn-ghost py-3">
-          Cancel
+        <RouterLink
+            :to="isEditing && initial ? `/places/${initial.id}` : '/journal'"
+            class="btn btn-ghost py-3"
+            >
+            Cancel
         </RouterLink>
       </div>
     </div>

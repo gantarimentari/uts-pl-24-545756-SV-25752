@@ -8,6 +8,7 @@ import AddPlaceView from '@/views/AddPlaceView.vue'
 import MapView from '@/views/MapView.vue'
 import PlacesView from '@/views/PlacesView.vue'
 import PlaceDetailView from '@/views/PlaceDetailView.vue'
+import EditPlaceView from '@/views/EditPlaceView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -56,6 +57,12 @@ const router = createRouter({
     component: PlaceDetailView,
     meta: { requiresAuth: true },
   },
+  {
+  path: '/places/:id/edit',
+  name: 'place-edit',
+  component: EditPlaceView,
+  meta: { requiresAuth: true },
+},
   ],
 })
 router.beforeEach((to) => {
