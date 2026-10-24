@@ -35,20 +35,41 @@ async function handleLogin() {
       }),
     })
 
+    if (!data.token) {
+      errorMessage.value = 'Login gagal. Silakan periksa email dan password.'
+      return
+    }
+
     // Simpan token autentikasi Laravel Sanctum
     localStorage.setItem('auth_token', data.token)
 
     // Arahkan pengguna ke halaman jurnal
     await router.push('/journal')
+
   } catch (error) {
-    errorMessage.value =
-      error instanceof Error
-        ? error.message
-        : 'Login gagal. Silakan coba lagi.'
+    const message =
+      error instanceof Error ? error.message : ''
+
+    const lowerMessage = message.toLowerCase()
+
+    if (
+      lowerMessage.includes('unauthenticated') ||
+      lowerMessage.includes('invalid') ||
+      lowerMessage.includes('credentials') ||
+      lowerMessage.includes('incorrect')
+    ) {
+      errorMessage.value =
+        'Email atau password salah. Silakan periksa kembali.'
+    } else {
+      errorMessage.value =
+        message || 'Login gagal. Silakan coba lagi.'
+    }
+
   } finally {
     isLoading.value = false
   }
 }
+
 </script>
 
 <template>
