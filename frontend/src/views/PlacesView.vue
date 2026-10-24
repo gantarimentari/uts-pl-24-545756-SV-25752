@@ -220,9 +220,10 @@ onMounted(loadPlaces)
 
       <!-- Place cards -->
       <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <div
+        <RouterLink
           v-for="(place, index) in filteredPlaces"
           :key="place.id"
+          :to="`/places/${place.id}`"
           class="card-paper overflow-hidden transition hover:-translate-y-1 hover:shadow-lift"
           :style="{
             transform: `rotate(${[-0.8, 0.6, -0.4, 0.9][index % 4]}deg)`,
@@ -271,7 +272,7 @@ onMounted(loadPlaces)
               {{ formatDate(place.visit_date) }}
             </p>
           </div>
-        </div>
+        </RouterLink>
       </div>
 
       <!-- No search/filter results -->

@@ -7,8 +7,8 @@ import { MapPin, Star } from 'lucide-vue-next'
 import LocationPicker from '@/components/placelog/LocationPicker.vue'
 import Sparkle from '@/components/placelog/bits/Sparkle.vue'
 
-import { createPlace } from '@/services/places'
-import type { PlacePayload } from '@/types/place'
+import { createPlace, updatePlace } from '@/services/places'
+import type { Place, PlacePayload } from '@/types/place'
 
 const router = useRouter()
 
@@ -48,6 +48,9 @@ function setLocation(
     form.value.address = address
   }
 }
+const props = defineProps<{
+  initial?: Place
+}>()
 
 async function handleSubmit() {
   error.value = ''
