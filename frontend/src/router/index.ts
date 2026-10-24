@@ -5,6 +5,7 @@ import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 import JournalView from '@/views/JournalView.vue'
 import AddPlaceView from '@/views/AddPlaceView.vue'
+import MapView from '@/views/MapView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -33,6 +34,12 @@ const router = createRouter({
       path: '/places/new',
       name: 'add-place',
       component: AddPlaceView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/map',
+      name: 'map',
+      component: MapView,
       meta: { requiresAuth: true },
     },
   ],
