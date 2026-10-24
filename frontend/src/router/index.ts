@@ -1,15 +1,16 @@
+
 import { createRouter, createWebHistory } from 'vue-router'
-// import HomeView from '../views/HomeView.vue'
+
 import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
+import JournalView from '@/views/JournalView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      redirect: '/login',
-      // component: HomeView,
+      redirect: '/journal',
     },
     {
       path: '/login',
@@ -21,7 +22,28 @@ const router = createRouter({
       name: 'register',
       component: RegisterView,
     },
+    {
+      path: '/journal',
+      name: 'journal',
+      component: JournalView,
+      meta: { requiresAuth: true },
+    },
   ],
+})
+router.beforeEach((to) => {
+  const token = localStorage.getItem('auth_token')
+
+  if (to.meta.requiresAuth && !token) {
+    return { name: 'login' }
+  }
+
+
+  if (
+    token &&
+    (to.name === 'login' || to.name === 'register')
+  ) {
+    return { name: 'journal' }
+  }
 })
 
 export default router
