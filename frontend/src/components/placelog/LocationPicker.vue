@@ -4,6 +4,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { Search, MapPin } from 'lucide-vue-next'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import axios from 'axios'
 
 type SearchResult = {
   place_id: number
@@ -33,6 +34,7 @@ let searchController: AbortController | null = null
 
 const defaultPosition: L.LatLngExpression = [-7.7956, 110.3695]
 
+// Menampilkan atau memperbarui marker pada peta
 function updateMarker(lat: number, lng: number) {
   if (!map) return
 
@@ -49,18 +51,21 @@ function updateMarker(lat: number, lng: number) {
   }
 }
 
+// Memilih lokasi dan mengirim koordinat ke form
 function selectLocation(lat: number, lng: number, address?: string) {
   updateMarker(lat, lng)
   map?.setView([lat, lng], 16)
   emit('change', lat, lng, address)
 }
 
+// Mencari lokasi menggunakan Axios dan Nominatim
 async function searchLocation() {
   const keyword = query.value.trim()
 
   if (!keyword) return
 
   searchController?.abort()
+
   const controller = new AbortController()
   searchController = controller
 
@@ -69,16 +74,15 @@ async function searchLocation() {
   results.value = []
 
   try {
-    const params = new URLSearchParams({
-      q: keyword,
-      format: 'jsonv2',
-      limit: '5',
-      addressdetails: '1',
-    })
-
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?${params}`,
+    const response = await axios.get<SearchResult[]>(
+      'https://nominatim.openstreetmap.org/search',
       {
+        params: {
+          q: keyword,
+          format: 'jsonv2',
+          limit: 5,
+          addressdetails: 1,
+        },
         signal: controller.signal,
         headers: {
           Accept: 'application/json',
@@ -86,22 +90,21 @@ async function searchLocation() {
       },
     )
 
-    if (!response.ok) {
-      throw new Error('Location search is unavailable.')
-    }
+    // Axios otomatis membaca respons JSON
+    if (searchController !== controller) return
 
-    results.value = (await response.json()) as SearchResult[]
+    results.value = response.data
 
     if (results.value.length === 0) {
       searchError.value = 'No locations found. Try another keyword.'
     }
   } catch (error) {
+    // Mengabaikan request yang dibatalkan
     if (controller.signal.aborted) return
 
-    searchError.value =
-      error instanceof Error
-        ? error.message
-        : 'Failed to search locations.'
+    searchError.value = axios.isAxiosError(error)
+      ? error.message
+      : 'Failed to search locations.'
   } finally {
     if (searchController === controller) {
       searching.value = false
@@ -110,6 +113,7 @@ async function searchLocation() {
   }
 }
 
+// Memilih lokasi dari hasil pencarian
 function chooseResult(result: SearchResult) {
   const lat = Number(result.lat)
   const lng = Number(result.lon)
@@ -120,6 +124,7 @@ function chooseResult(result: SearchResult) {
   selectLocation(lat, lng, result.display_name)
 }
 
+// Inisialisasi peta Leaflet
 onMounted(() => {
   if (!mapElement.value) return
 
@@ -141,11 +146,13 @@ onMounted(() => {
     updateMarker(props.latitude!, props.longitude!)
   }
 
+  // Memilih lokasi dengan mengklik peta
   map.on('click', (event: L.LeafletMouseEvent) => {
     selectLocation(event.latlng.lat, event.latlng.lng)
   })
 })
 
+// Memperbarui marker ketika koordinat berubah
 watch(
   () => [props.latitude, props.longitude] as const,
   ([lat, lng]) => {
@@ -155,6 +162,7 @@ watch(
   },
 )
 
+// Membersihkan map dan request ketika komponen ditutup
 onUnmounted(() => {
   searchController?.abort()
   map?.remove()
@@ -202,7 +210,11 @@ onUnmounted(() => {
         class="flex w-full items-start gap-2 border-b border-border px-4 py-3 text-left text-sm transition hover:bg-cream"
         @click="chooseResult(result)"
       >
-        <MapPin :size="16" class="mt-0.5 shrink-0 text-maroon" />
+        <MapPin
+          :size="16"
+          class="mt-0.5 shrink-0 text-maroon"
+        />
+
         <span>{{ result.display_name }}</span>
       </button>
     </div>
