@@ -72,13 +72,7 @@ router.beforeEach((to) => {
     return { name: 'login' }
   }
 
-
-  if (
-    token &&
-    (to.name === 'login' || to.name === 'register')
-  ) {
-    return { name: 'journal' }
-  }
+  
 })
 
 export default router
