@@ -1,35 +1,162 @@
-@import './base.css';
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap');
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-cream: var(--cream);
+  --color-paper: var(--paper);
+  --color-sage: var(--sage);
+  --color-maroon: var(--maroon);
+  --color-ink: var(--ink);
+  --color-map-land: var(--map-land);
+  --color-map-water: var(--map-water);
+  --color-map-park: var(--map-park);
+  --color-map-road: var(--map-road);
+  --color-pin-1: var(--pin-1);
+  --color-pin-2: var(--pin-2);
+  --color-pin-3: var(--pin-3);
+  --color-pin-4: var(--pin-4);
+  --color-pin-5: var(--pin-5);
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
+:root {
+  --radius: 0.875rem;
+  --cream: oklch(0.93 0.075 92);          /* buttercream #F7E7B2 */
+  --paper: oklch(0.985 0.012 90);         /* warm off-white */
+  --sage: oklch(0.74 0.05 155);           /* muted green */
+  --maroon: oklch(0.36 0.1 10);           /* #6B2638 */
+  --ink: oklch(0.27 0.03 160);
+
+  --background: oklch(0.965 0.03 90);
+  --foreground: var(--ink);
+  --card: var(--paper);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --primary: oklch(0.42 0.06 163);        /* deep green #315C4B */
+  --primary-foreground: oklch(0.98 0.015 90);
+  --secondary: oklch(0.9 0.04 88);        /* soft beige */
+  --secondary-foreground: var(--ink);
+  --muted: oklch(0.93 0.025 88);
+  --muted-foreground: oklch(0.5 0.02 120);
+  --accent: var(--cream);
+  --accent-foreground: var(--maroon);
+  --destructive: oklch(0.5 0.14 25);
+  --destructive-foreground: oklch(0.98 0.01 90);
+  --border: oklch(0.86 0.03 85);
+  --input: oklch(0.84 0.03 85);
+  --ring: oklch(0.42 0.06 163);
+
+  --map-land: oklch(0.95 0.045 92);
+  --map-water: oklch(0.83 0.04 200);
+  --map-park: oklch(0.86 0.06 145);
+  --map-road: oklch(0.99 0.01 90);
+  --pin-1: var(--maroon);
+  --pin-2: oklch(0.42 0.06 163);
+  --pin-3: oklch(0.68 0.12 60);
+  --pin-4: oklch(0.6 0.09 25);
+  --pin-5: oklch(0.55 0.06 230);
+
+  --shadow-soft: 0 1px 0 oklch(0.85 0.03 85), 0 10px 24px -14px oklch(0.3 0.04 100 / 0.35);
+  --shadow-lift: 0 2px 0 oklch(0.85 0.03 85), 0 22px 40px -20px oklch(0.3 0.04 100 / 0.45);
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
-@media (min-width: 1024px) {
+@layer base {
+  * { border-color: var(--color-border); }
   body {
-    display: flex;
-    place-items: center;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    background-image: radial-gradient(oklch(0.86 0.04 88 / 0.45) 1px, transparent 1px);
+    background-size: 22px 22px;
   }
+  h1, h2, h3, .font-display { font-family: var(--font-display); font-optical-sizing: auto; }
+}
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+@utility card-paper {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+}
+@utility shadow-soft { box-shadow: var(--shadow-soft); }
+@utility shadow-lift { box-shadow: var(--shadow-lift); }
+@utility tape {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    top: -10px; left: 50%;
+    width: 64px; height: 20px;
+    transform: translateX(-50%) rotate(-3deg);
+    background: color-mix(in oklab, var(--cream) 80%, transparent);
+    border: 1px dashed color-mix(in oklab, var(--maroon) 25%, transparent);
+    z-index: 2;
   }
 }
+@utility btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  border-radius: var(--radius-md);
+  padding: .65rem 1.1rem; font-weight: 600; font-size: .925rem;
+  transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+  &:active { transform: translateY(1px); }
+}
+@utility btn-primary {
+  background: var(--color-primary); color: var(--color-primary-foreground);
+  box-shadow: 0 3px 0 oklch(0.3 0.05 163);
+  &:hover { background: oklch(0.38 0.06 163); }
+}
+@utility btn-ghost {
+  background: transparent; color: var(--color-foreground);
+  border: 1px solid var(--color-border);
+  &:hover { background: var(--color-secondary); }
+}
+@utility btn-danger-soft {
+  background: transparent; color: var(--color-destructive);
+  &:hover { background: color-mix(in oklab, var(--destructive) 10%, transparent); }
+}
+@utility field {
+  width: 100%; background: var(--color-paper);
+  border: 1px solid var(--color-input); border-radius: var(--radius-md);
+  padding: .7rem .9rem; font-size: .95rem; outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  &:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 18%, transparent); }
+}
+@utility wiggle-in { animation: wiggle-in .35s ease-out; }
+@keyframes wiggle-in { from { opacity: 0; transform: translateY(6px) scale(.97) rotate(-1deg); } to { opacity: 1; transform: none; } }
+@keyframes pin-drop { from { transform: translate(-50%, -140%); opacity: 0; } to { transform: translate(-50%, -100%); opacity: 1; } }
+@utility pin-drop { animation: pin-drop .35s cubic-bezier(.3,1.6,.6,1) both; }
+@keyframes float-y { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
+@utility float-y { animation: float-y 5s ease-in-out infinite; }
