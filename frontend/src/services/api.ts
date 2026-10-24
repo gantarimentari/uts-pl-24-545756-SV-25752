@@ -1,42 +1,63 @@
 
-const API_URL = import.meta.env.VITE_API_URL
+import axios from 'axios'
+import type { AxiosRequestConfig } from 'axios'
 
-export async function apiRequest<T = unknown>(
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  headers: {
+    Accept: 'application/json',
+  },
+})
+
+// Menambahkan token login ke setiap request
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token')
+
+  if (token) {
+    config.headers.set('Authorization', `Bearer ${token}`)
+  }
+
+  return config
+})
+
+// Semua request API akan menggunakan Axios
+export async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const token = localStorage.getItem('auth_token')
+  try {
+    const config: AxiosRequestConfig = {
+      url: endpoint,
+      method: options.method || 'GET',
+    }
 
-  const headers = new Headers(options.headers)
+    if (options.headers) {
+      const headers = new Headers(options.headers)
+      config.headers = Object.fromEntries(headers.entries())
+    }
 
-  headers.set('Accept', 'application/json')
+    if (options.body != null) {
+      config.data =
+        typeof options.body === 'string'
+          ? JSON.parse(options.body)
+          : options.body
+    }
 
-  if (options.body && !(options.body instanceof FormData)) {
-    headers.set('Content-Type', 'application/json')
+    const response = await api.request<T>(config)
+
+    return response.data
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        'Request failed.'
+
+      throw new Error(message)
+    }
+
+    throw error
   }
-
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`)
-  }
-
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers,
-  })
-
-  const data: unknown = await response.json().catch(() => null)
-
-  if (!response.ok) {
-    const message =
-      typeof data === 'object' &&
-      data !== null &&
-      'message' in data &&
-      typeof data.message === 'string'
-        ? data.message
-        : 'Terjadi kesalahan saat mengakses API'
-
-    throw new Error(message)
-  }
-
-  return data as T
 }
+
+export default api
