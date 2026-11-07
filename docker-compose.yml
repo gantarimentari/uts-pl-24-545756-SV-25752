@@ -35,6 +35,8 @@ services:
       SESSION_DRIVER: database
       CACHE_STORE: database
       QUEUE_CONNECTION: database
+      LOG_CHANNEL: stderr
+      LOG_LEVEL: info
     ports:
       - "8000:8000"
     depends_on:
