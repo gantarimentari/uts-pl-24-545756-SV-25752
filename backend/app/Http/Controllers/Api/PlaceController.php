@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Place;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class PlaceController extends Controller
 {
@@ -23,10 +25,10 @@ class PlaceController extends Controller
         ]);
     }
 
-    // Menambahkan tempat baru
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        // Validasi input sebelum menyimpan data
+        $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             'category' => ['required', 'string', 'max:255'],
             'rating' => ['nullable', 'integer', 'between:1,5'],
@@ -37,15 +39,60 @@ class PlaceController extends Controller
             'visit_date' => ['nullable', 'date'],
         ]);
 
-        $place = $request->user()->places()->create($validated);
+        // WARNING: validasi gagal
+        if ($validator->fails()) {
+            Log::warning('place_validation_failed', [
+                'actor' => 'authenticated_user',
+                'action' => 'create_place',
+                'reason' => 'input_validation_failed',
+                'component' => 'place_controller',
+                'result' => 'rejected',
+            ]);
 
-        return response()->json([
-            'message' => 'Tempat berhasil ditambahkan.',
-            'data' => $place,
-        ], 201);
+            // Mempertahankan respons validasi standar Laravel
+            throw new ValidationException(
+                $validator
+            );
+        }
+
+        $validated = $validator->validated();
+
+        try {
+            // Menyimpan data tempat ke database
+            $place = $request->user()
+                ->places()
+                ->create($validated);
+
+            // INFO: penyimpanan berhasil
+            Log::info('place_created', [
+                'actor' => 'authenticated_user',
+                'action' => 'create_place',
+                'reason' => 'database_insert_succeeded',
+                'component' => 'place_controller',
+                'result' => 'success',
+            ]);
+
+            return response()->json([
+                'message' => 'Tempat berhasil ditambahkan.',
+                'data' => $place,
+            ], 201);
+
+        } catch (QueryException $e) {
+            // ERROR: operasi database gagal
+            Log::error('place_database_error', [
+                'actor' => 'authenticated_user',
+                'action' => 'create_place',
+                'reason' => 'database_query_failed',
+                'component' => 'database',
+                'result' => 'failed',
+            ]);
+
+            return response()->json([
+                'message' => 'Layanan database sedang bermasalah.',
+            ], 503);
+        }
     }
 
-    // Menampilkan detail satu tempat
     public function show(Request $request, string $id)
     {
         $place = $request->user()->places()->findOrFail($id);
