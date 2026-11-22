@@ -1,0 +1,14 @@
+
+groups:
+  - name: placelog-alerts
+    rules:
+      - alert: PlaceLogMonitoringTargetDown
+        expr: up{job="cadvisor"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          application: placelog
+        annotations:
+          summary: "Monitoring PlaceLog terputus"
+          description: "Target {{ $labels.instance }} tidak dapat diakses selama 1 menit."
+          first_action: "Periksa status dan log container cAdvisor menggunakan docker compose ps dan docker compose logs cadvisor sebelum melakukan restart."
